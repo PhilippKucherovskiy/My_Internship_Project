@@ -5,7 +5,7 @@
     {
         public int Id { get; set; }
         public string Name { get; set; }
-        // Другие свойства тега, если необходимо.
+        public ICollection<ArticleTag> ArticleTags { get; set; }
     }
 
 }

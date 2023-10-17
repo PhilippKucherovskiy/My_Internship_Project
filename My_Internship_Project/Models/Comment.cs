@@ -6,7 +6,10 @@
         public int Id { get; set; }
         public string Content { get; set; }
         public DateTime DateCreated { get; set; }
-        // Другие свойства комментария, такие как автор и др.
+        public int CommentId { get; set; }
+        
+        public int ArticleId { get; set; } 
+        public Article Article { get; set; } 
     }
 
 }
