@@ -23,7 +23,7 @@
                 services.AddDbContext<ApplicationDbContext>(options =>
                     options.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
 
-                services.AddControllersWithViews();
+            services.AddControllersWithViews();
             }
 
             public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
