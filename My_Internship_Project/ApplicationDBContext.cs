@@ -12,6 +12,8 @@ namespace My_Internship_Project
         public DbSet<Tag> Tags { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<ArticleTag> ArticleTags { get; set; }
+        public DbSet<FavoriteArticle> FavoriteArticles { get; set; }
+
 
 
 
