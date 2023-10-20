@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using My_Internship_Project.Models;
+using My_Internship_Project.Services;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,26 +12,24 @@ namespace My_Internship_Project.Controllers
     [ApiController]
     public class ArticleController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly ArticleService _articleService;
 
-        public ArticleController(ApplicationDbContext context)
+        public ArticleController(ArticleService articleService)
         {
-            _context = context;
+            _articleService = articleService;
         }
 
-        // GET: api/Article
         [HttpGet]
         public IActionResult GetArticles()
         {
-            var articles = _context.Articles.Include(a => a.Author).ToList();
+            var articles = _articleService.GetArticles();
             return Ok(articles);
         }
 
-        // GET: api/Article/5
         [HttpGet("{id}")]
         public IActionResult GetArticle(int id)
         {
-            var article = _context.Articles.Include(a => a.Author).FirstOrDefault(a => a.Id == id);
+            var article = _articleService.GetArticle(id);
             if (article == null)
             {
                 return NotFound();
@@ -38,39 +37,31 @@ namespace My_Internship_Project.Controllers
             return Ok(article);
         }
 
-        // POST: api/Article
         [HttpPost]
         public IActionResult CreateArticle(Article article)
         {
-            _context.Articles.Add(article);
-            _context.SaveChanges();
+            _articleService.CreateArticle(article);
             return CreatedAtAction(nameof(GetArticle), new { id = article.Id }, article);
         }
 
-        // PUT: api/Article/5
         [HttpPut("{id}")]
         public IActionResult UpdateArticle(int id, Article article)
         {
-            if (id != article.Id)
+            try
             {
-                return BadRequest();
+                _articleService.UpdateArticle(id, article);
+                return NoContent();
             }
-            _context.Entry(article).State = EntityState.Modified;
-            _context.SaveChanges();
-            return NoContent();
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
-        // DELETE: api/Article/5
         [HttpDelete("{id}")]
         public IActionResult DeleteArticle(int id)
         {
-            var article = _context.Articles.Find(id);
-            if (article == null)
-            {
-                return NotFound();
-            }
-            _context.Articles.Remove(article);
-            _context.SaveChanges();
+            _articleService.DeleteArticle(id);
             return NoContent();
         }
     }

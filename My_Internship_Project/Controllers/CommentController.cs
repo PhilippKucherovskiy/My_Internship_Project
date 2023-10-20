@@ -2,6 +2,7 @@
 using My_Internship_Project.Models;
 using System.Linq;
 using System;
+using My_Internship_Project.Services;
 
 namespace My_Internship_Project.Controllers
 {
@@ -9,26 +10,24 @@ namespace My_Internship_Project.Controllers
     [ApiController]
     public class CommentController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly CommentService _commentService;
 
-        public CommentController(ApplicationDbContext context)
+        public CommentController(CommentService commentService)
         {
-            _context = context;
+            _commentService = commentService;
         }
 
-        // GET: api/Comment
         [HttpGet]
         public IActionResult GetComments()
         {
-            var comments = _context.Comments.ToList();
+            var comments = _commentService.GetComments();
             return Ok(comments);
         }
 
-        // GET: api/Comment/5
         [HttpGet("{id}")]
         public IActionResult GetComment(int id)
         {
-            var comment = _context.Comments.Find(id);
+            var comment = _commentService.GetComment(id);
             if (comment == null)
             {
                 return NotFound();
@@ -36,39 +35,31 @@ namespace My_Internship_Project.Controllers
             return Ok(comment);
         }
 
-        // POST: api/Comment
         [HttpPost]
         public IActionResult CreateComment(Comment comment)
         {
-            _context.Comments.Add(comment);
-            _context.SaveChanges();
+            _commentService.CreateComment(comment);
             return CreatedAtAction(nameof(GetComment), new { id = comment.Id }, comment);
         }
 
-        // PUT: api/Comment/5
         [HttpPut("{id}")]
         public IActionResult UpdateComment(int id, Comment comment)
         {
-            if (id != comment.Id)
+            try
             {
-                return BadRequest();
+                _commentService.UpdateComment(id, comment);
+                return NoContent();
             }
-            _context.Entry(comment).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-            _context.SaveChanges();
-            return NoContent();
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
-        // DELETE: api/Comment/5
         [HttpDelete("{id}")]
         public IActionResult DeleteComment(int id)
         {
-            var comment = _context.Comments.Find(id);
-            if (comment == null)
-            {
-                return NotFound();
-            }
-            _context.Comments.Remove(comment);
-            _context.SaveChanges();
+            _commentService.DeleteComment(id);
             return NoContent();
         }
     }

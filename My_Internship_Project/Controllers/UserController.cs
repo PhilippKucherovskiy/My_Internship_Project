@@ -1,8 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+﻿// UserController
+using Microsoft.AspNetCore.Mvc;
 using My_Internship_Project.Models;
+using My_Internship_Project.Services;
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace My_Internship_Project.Controllers
@@ -11,26 +11,24 @@ namespace My_Internship_Project.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly UserService _userService;
 
-        public UserController(ApplicationDbContext context)
+        public UserController(UserService userService)
         {
-            _context = context;
+            _userService = userService;
         }
 
-        // GET: api/User
         [HttpGet]
-        public async Task<IActionResult> GetUsers()
+        public IActionResult GetUsers()
         {
-            var users = await _context.Users.ToListAsync();
+            var users = _userService.GetUsers();
             return Ok(users);
         }
 
-        // GET: api/User/5
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetUser(int id)
+        public IActionResult GetUser(int id)
         {
-            var user = await _context.Users.FindAsync(id);
+            var user = _userService.GetUser(id);
             if (user == null)
             {
                 return NotFound();
@@ -38,40 +36,66 @@ namespace My_Internship_Project.Controllers
             return Ok(user);
         }
 
-        // POST: api/User
         [HttpPost]
-        public async Task<IActionResult> CreateUser(User user)
+        public async Task<IActionResult> CreateUser(User user, string role)
         {
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
+            _userService.CreateUser(user, role);
             return CreatedAtAction(nameof(GetUser), new { id = user.Id }, user);
         }
 
-        // PUT: api/User/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateUser(int id, User user)
+        public IActionResult UpdateUser(int id, User user)
         {
             if (id != user.Id)
             {
                 return BadRequest();
             }
-            _context.Entry(user).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
+            _userService.UpdateUser(user);
             return NoContent();
         }
 
-        // DELETE: api/User/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteUser(int id)
+        public IActionResult DeleteUser(int id)
         {
-            var user = await _context.Users.FindAsync(id);
+            var user = _userService.GetUser(id);
             if (user == null)
             {
                 return NotFound();
             }
-            _context.Users.Remove(user);
-            await _context.SaveChangesAsync();
+            _userService.DeleteUser(id);
             return NoContent();
+        }
+
+        [HttpPost("subscriptions")]
+        public IActionResult CreateUserSubscription(UserSubscription subscription)
+        {
+            _userService.CreateUserSubscription(subscription);
+            return CreatedAtAction(nameof(GetUser), new { id = subscription.SubscriberId }, subscription);
+        }
+
+        [HttpDelete("subscriptions/{subscriberId}/{targetUserId}")]
+        public IActionResult DeleteUserSubscription(int subscriberId, int targetUserId)
+        {
+            _userService.DeleteUserSubscription(subscriberId, targetUserId);
+            return NoContent();
+        }
+
+        [HttpPost("account")]
+        public IActionResult CreateUserAccount(UserAccount account)
+        {
+            _userService.CreateUserAccount(account);
+            return CreatedAtAction(nameof(GetUserAccount), new { userId = account.UserId }, account);
+        }
+
+        [HttpGet("account/{userId}")]
+        public IActionResult GetUserAccount(int userId)
+        {
+            var account = _userService.GetUserAccount(userId);
+            if (account == null)
+            {
+                return NotFound();
+            }
+            return Ok(account);
         }
     }
 }

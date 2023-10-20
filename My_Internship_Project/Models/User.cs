@@ -1,7 +1,9 @@
-﻿namespace My_Internship_Project.Models
+﻿using Microsoft.AspNetCore.Identity;
+
+namespace My_Internship_Project.Models
 {
     // User.cs
-    public class User
+    public class User : IdentityUser
     {
         public int Id { get; set; }
         public string UserName { get; set; }

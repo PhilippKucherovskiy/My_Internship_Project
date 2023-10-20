@@ -1,21 +1,20 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using My_Internship_Project.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace My_Internship_Project
 {
-    // ApplicationDbContext.cs
-    public class ApplicationDbContext : DbContext
+    public class ApplicationDbContext : IdentityDbContext<User>
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
-        public DbSet<User> Users { get; set; }
+        public DbSet<UserAccount> UserAccounts { get; set; }
+        public DbSet<UserSubscription> UserSubscriptions { get; set; }
         public DbSet<Article> Articles { get; set; }
         public DbSet<Tag> Tags { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<ArticleTag> ArticleTags { get; set; }
         public DbSet<FavoriteArticle> FavoriteArticles { get; set; }
 
-
-
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -41,14 +40,6 @@ namespace My_Internship_Project
 
             modelBuilder.Entity<UserSubscription>()
                 .HasKey(us => new { us.SubscriberId, us.TargetUserId });
-
-
         }
-
-
-
-
-
     }
 }
-
