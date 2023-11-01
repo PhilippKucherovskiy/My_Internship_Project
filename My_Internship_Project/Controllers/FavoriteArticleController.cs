@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using My_Internship_Project.Models;
 using System.Linq;
+using My_Internship_Project.Services;
 
 namespace My_Internship_Project.Controllers
 {
@@ -8,18 +9,18 @@ namespace My_Internship_Project.Controllers
     [ApiController]
     public class FavoriteArticleController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IFavoriteArticleService _favoriteArticleService;
 
-        public FavoriteArticleController(ApplicationDbContext context)
+        public FavoriteArticleController(IFavoriteArticleService favoriteArticleService)
         {
-            _context = context;
+            _favoriteArticleService = favoriteArticleService;
         }
 
         // GET: api/FavoriteArticle
         [HttpGet]
         public IActionResult GetFavoriteArticles()
         {
-            var favoriteArticles = _context.FavoriteArticles.ToList();
+            var favoriteArticles = _favoriteArticleService.GetFavoriteArticles();
             return Ok(favoriteArticles);
         }
 
@@ -27,7 +28,7 @@ namespace My_Internship_Project.Controllers
         [HttpGet("{id}")]
         public IActionResult GetFavoriteArticle(int id)
         {
-            var favoriteArticle = _context.FavoriteArticles.Find(id);
+            var favoriteArticle = _favoriteArticleService.GetFavoriteArticle(id);
             if (favoriteArticle == null)
             {
                 return NotFound();
@@ -39,8 +40,7 @@ namespace My_Internship_Project.Controllers
         [HttpPost]
         public IActionResult CreateFavoriteArticle(FavoriteArticle favoriteArticle)
         {
-            _context.FavoriteArticles.Add(favoriteArticle);
-            _context.SaveChanges();
+            _favoriteArticleService.CreateFavoriteArticle(favoriteArticle);
             return CreatedAtAction(nameof(GetFavoriteArticle), new { id = favoriteArticle.UserId }, favoriteArticle);
         }
 
@@ -48,13 +48,7 @@ namespace My_Internship_Project.Controllers
         [HttpDelete("{id}")]
         public IActionResult DeleteFavoriteArticle(int id)
         {
-            var favoriteArticle = _context.FavoriteArticles.Find(id);
-            if (favoriteArticle == null)
-            {
-                return NotFound();
-            }
-            _context.FavoriteArticles.Remove(favoriteArticle);
-            _context.SaveChanges();
+            _favoriteArticleService.DeleteFavoriteArticle(id);
             return NoContent();
         }
     }

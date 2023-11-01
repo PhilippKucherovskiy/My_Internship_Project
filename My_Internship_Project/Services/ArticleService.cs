@@ -1,51 +1,53 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using My_Internship_Project;
 using My_Internship_Project.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
-namespace My_Internship_Project.Services
+public class ArticleService : IArticleService
 {
-    public class ArticleService
+    private readonly ApplicationDbContext _context;
+
+    public ArticleService(ApplicationDbContext context)
     {
-        private readonly ApplicationDbContext _context;
+        _context = context;
+    }
 
-        public ArticleService(ApplicationDbContext context)
+    public List<Article> GetArticles()
+    {
+        return _context.Articles.Include(a => a.Author).ToList();
+    }
+
+    public Article GetArticle(int id)
+    {
+        return _context.Articles.Include(a => a.Author).FirstOrDefault(a => a.Id == id);
+    }
+
+    public void CreateArticle(Article article)
+    {
+        _context.Articles.Add(article);
+        _context.SaveChanges();
+    }
+
+    public void UpdateArticle(int id, Article article)
+    {
+        if (id != article.Id)
         {
-            _context = context;
+            throw new ArgumentException("Article ID mismatch");
         }
+        _context.Entry(article).State = EntityState.Modified;
+        _context.SaveChanges();
+    }
 
-        public List<Article> GetArticles()
+    public void DeleteArticle(int id)
+    {
+        var article = _context.Articles.Find(id);
+        if (article != null)
         {
-            return _context.Articles.Include(a => a.Author).ToList();
-        }
-
-        public Article GetArticle(int id)
-        {
-            return _context.Articles.Include(a => a.Author).FirstOrDefault(a => a.Id == id);
-        }
-
-        public void CreateArticle(Article article)
-        {
-            _context.Articles.Add(article);
+            _context.Articles.Remove(article);
             _context.SaveChanges();
-        }
-
-        public void UpdateArticle(int id, Article article)
-        {
-            if (id != article.Id)
-            {
-                throw new ArgumentException("Article ID mismatch");
-            }
-            _context.Entry(article).State = EntityState.Modified;
-            _context.SaveChanges();
-        }
-
-        public void DeleteArticle(int id)
-        {
-            var article = _context.Articles.Find(id);
-            if (article != null)
-            {
-                _context.Articles.Remove(article);
-                _context.SaveChanges();
-            }
         }
     }
 }

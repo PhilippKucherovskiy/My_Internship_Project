@@ -7,6 +7,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using My_Internship_Project.Models;
 using My_Internship_Project;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 
 public class Startup
 {
@@ -25,35 +29,60 @@ public class Startup
         services.AddIdentity<User, IdentityRole>(options =>
         {
             // Настройки Identity
+            options.Password.RequireDigit = true;
+            options.Password.RequireLowercase = true;
+            options.Password.RequireUppercase = true;
+            options.Password.RequireNonAlphanumeric = true;
+            options.Password.RequiredLength = 8;
         })
         .AddEntityFrameworkStores<ApplicationDbContext>()
         .AddDefaultTokenProviders();
 
-        // Добавление ролей
-        var serviceProvider = services.BuildServiceProvider();
-        using (var scope = serviceProvider.CreateScope())
+        // Настройки JWT
+        var jwtSettings = Configuration.GetSection("JwtSettings");
+        var key = Encoding.ASCII.GetBytes(jwtSettings["Key"]);
+        services.AddAuthentication(options =>
         {
-            var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-
-            // Создание ролей
-            var roles = new string[] { "User", "Administrator", "Moderator", "Author", "Guest" };
-            foreach (var role in roles)
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        })
+        .AddJwtBearer(options =>
+        {
+            options.RequireHttpsMetadata = false;
+            options.SaveToken = true;
+            options.TokenValidationParameters = new TokenValidationParameters
             {
-                if (!roleManager.RoleExistsAsync(role).Result)
-                {
-                    roleManager.CreateAsync(new IdentityRole(role)).Wait();
-                }
-            }
-        }
+                ValidateIssuer = true,
+                ValidIssuer = jwtSettings["Issuer"],
+                ValidateAudience = true,
+                ValidAudience = jwtSettings["Audience"],
+                ValidateLifetime = true,
+                IssuerSigningKey = new SymmetricSecurityKey(key),
+                ValidateIssuerSigningKey = true,
+            };
+        });
 
         services.AddControllersWithViews();
     }
 
-    public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+    private async Task CreateRoles(IServiceProvider serviceProvider)
+    {
+        var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+        var roles = new string[] { "Administrator", "Moderator", "User" };
+
+        foreach (var role in roles)
+        {
+            if (!await roleManager.RoleExistsAsync(role))
+            {
+                await roleManager.CreateAsync(new IdentityRole(role));
+            }
+        }
+    }
+
+    public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider serviceProvider)
     {
         if (env.IsDevelopment())
         {
-            app.UseDeveloperExceptionPage();
             app.UseDeveloperExceptionPage();
         }
         else
@@ -66,8 +95,12 @@ public class Startup
         app.UseStaticFiles();
         app.UseRouting();
 
-        app.UseAuthentication(); 
-        app.UseAuthorization();  
+        
+        app.UseAuthentication();
+        app.UseAuthorization();
+
+        
+        app.UseAuthentication();
 
         app.UseEndpoints(endpoints =>
         {
@@ -75,5 +108,7 @@ public class Startup
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
         });
+
+        CreateRoles(serviceProvider);
     }
 }

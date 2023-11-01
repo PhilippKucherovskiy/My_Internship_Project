@@ -12,9 +12,9 @@ namespace My_Internship_Project.Controllers
     [ApiController]
     public class ArticleController : ControllerBase
     {
-        private readonly ArticleService _articleService;
+        private readonly IArticleService _articleService;
 
-        public ArticleController(ArticleService articleService)
+        public ArticleController(IArticleService articleService)
         {
             _articleService = articleService;
         }

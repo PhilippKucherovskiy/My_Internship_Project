@@ -2,8 +2,8 @@
 
 namespace My_Internship_Project.Models
 {
-    // User.cs
-    public class User : IdentityUser
+    
+    public class User : IdentityUser<int>
     {
         public int Id { get; set; }
         public string UserName { get; set; }

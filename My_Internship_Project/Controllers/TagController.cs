@@ -1,74 +1,65 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using My_Internship_Project.Models;
-using System.Linq;
+using My_Internship_Project.Services;
 
-namespace My_Internship_Project.Controllers
+[Route("api/[controller]")]
+[ApiController]
+public class TagController : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class TagController : ControllerBase
+    private readonly ITagService _tagService;
+
+    public TagController(ITagService tagService)
     {
-        private readonly ApplicationDbContext _context;
+        _tagService = tagService;
+    }
 
-        public TagController(ApplicationDbContext context)
+    [HttpGet]
+    public IActionResult GetTags()
+    {
+        var tags = _tagService.GetTags();
+        return Ok(tags);
+    }
+
+    [HttpGet("{id}")]
+    public IActionResult GetTag(int id)
+    {
+        var tag = _tagService.GetTag(id);
+        if (tag == null)
         {
-            _context = context;
+            return NotFound();
         }
+        return Ok(tag);
+    }
 
-        // GET: api/Tag
-        [HttpGet]
-        public IActionResult GetTags()
+    [HttpPost]
+    public IActionResult CreateTag(Tag tag)
+    {
+        _tagService.CreateTag(tag);
+        return CreatedAtAction(nameof(GetTag), new { id = tag.Id }, tag);
+    }
+
+    [HttpPut("{id}")]
+    public IActionResult UpdateTag(int id, Tag tag)
+    {
+        if (id != tag.Id)
         {
-            var tags = _context.Tags.ToList();
-            return Ok(tags);
+            return BadRequest();
         }
+        _tagService.UpdateTag(id, tag);
+        return NoContent();
+    }
 
-        // GET: api/Tag/5
-        [HttpGet("{id}")]
-        public IActionResult GetTag(int id)
+    [HttpDelete("{id}")]
+    public IActionResult DeleteTag(int id)
+    {
+        try
         {
-            var tag = _context.Tags.Find(id);
-            if (tag == null)
-            {
-                return NotFound();
-            }
-            return Ok(tag);
-        }
-
-        // POST: api/Tag
-        [HttpPost]
-        public IActionResult CreateTag(Tag tag)
-        {
-            _context.Tags.Add(tag);
-            _context.SaveChanges();
-            return CreatedAtAction(nameof(GetTag), new { id = tag.Id }, tag);
-        }
-
-        // PUT: api/Tag/5
-        [HttpPut("{id}")]
-        public IActionResult UpdateTag(int id, Tag tag)
-        {
-            if (id != tag.Id)
-            {
-                return BadRequest();
-            }
-            _context.Entry(tag).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-            _context.SaveChanges();
+            _tagService.DeleteTag(id);
             return NoContent();
         }
-
-        // DELETE: api/Tag/5
-        [HttpDelete("{id}")]
-        public IActionResult DeleteTag(int id)
+        catch (ArgumentException ex)
         {
-            var tag = _context.Tags.Find(id);
-            if (tag == null)
-            {
-                return NotFound();
-            }
-            _context.Tags.Remove(tag);
-            _context.SaveChanges();
-            return NoContent();
+            return NotFound(ex.Message);
         }
     }
 }

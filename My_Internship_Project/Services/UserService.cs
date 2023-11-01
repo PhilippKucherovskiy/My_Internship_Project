@@ -1,22 +1,26 @@
-﻿// UserService
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using My_Internship_Project.Models;
 using Microsoft.AspNetCore.Identity;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
 
 namespace My_Internship_Project.Services
 {
-    public class UserService
+    public class UserService : IUserService
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<User> _userManager;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public UserService(ApplicationDbContext context, UserManager<User> userManager)
+        public UserService(ApplicationDbContext context, UserManager<User> userManager, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
             _userManager = userManager;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public List<User> GetUsers()
@@ -31,19 +35,24 @@ namespace My_Internship_Project.Services
 
         public async Task CreateUser(User user, string role)
         {
-            // Устанавливаем имя пользователя
             user.UserName = user.Email;
-
-            // Создание пользователя
             var result = await _userManager.CreateAsync(user);
 
             if (result.Succeeded)
             {
-                // Пароль
                 await _userManager.AddPasswordAsync(user, user.Password);
-
-                // Добавляем пользователя в роль
                 await _userManager.AddToRoleAsync(user, role);
+
+                var roles = await _userManager.GetRolesAsync(user);
+                var claims = new List<Claim>();
+                foreach (var userRole in roles)
+                {
+                    claims.Add(new Claim(ClaimTypes.Role, userRole));
+                }
+                var identity = new ClaimsIdentity(claims, "custom");
+                var principal = new ClaimsPrincipal(identity);
+
+                await _httpContextAccessor.HttpContext.SignInAsync("custom", principal);
             }
         }
 
@@ -63,7 +72,6 @@ namespace My_Internship_Project.Services
             }
         }
 
-        // методы для работы с UserSubscription и UserAccount
         public void CreateUserSubscription(UserSubscription subscription)
         {
             _context.UserSubscriptions.Add(subscription);

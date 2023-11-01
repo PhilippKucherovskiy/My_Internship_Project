@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using My_Internship_Project.Models;
-using System.Linq;
 using System;
 using My_Internship_Project.Services;
 
@@ -10,9 +9,9 @@ namespace My_Internship_Project.Controllers
     [ApiController]
     public class CommentController : ControllerBase
     {
-        private readonly CommentService _commentService;
+        private readonly ICommentService _commentService;
 
-        public CommentController(CommentService commentService)
+        public CommentController(ICommentService commentService)
         {
             _commentService = commentService;
         }

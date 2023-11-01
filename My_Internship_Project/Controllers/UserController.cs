@@ -1,9 +1,16 @@
-﻿// UserController
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Identity;
 using My_Internship_Project.Models;
 using My_Internship_Project.Services;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
+using System.Data;
 
 namespace My_Internship_Project.Controllers
 {
@@ -11,9 +18,9 @@ namespace My_Internship_Project.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        private readonly UserService _userService;
+        private readonly IUserService _userService;
 
-        public UserController(UserService userService)
+        public UserController(IUserService userService)
         {
             _userService = userService;
         }
@@ -36,6 +43,7 @@ namespace My_Internship_Project.Controllers
             return Ok(user);
         }
 
+        [Authorize(Roles = "Moderator")]
         [HttpPost]
         public async Task<IActionResult> CreateUser(User user, string role)
         {
@@ -43,6 +51,7 @@ namespace My_Internship_Project.Controllers
             return CreatedAtAction(nameof(GetUser), new { id = user.Id }, user);
         }
 
+        [Authorize(Roles = "Moderator")]
         [HttpPut("{id}")]
         public IActionResult UpdateUser(int id, User user)
         {
@@ -54,6 +63,7 @@ namespace My_Internship_Project.Controllers
             return NoContent();
         }
 
+        [Authorize(Roles = "Moderator")]
         [HttpDelete("{id}")]
         public IActionResult DeleteUser(int id)
         {
@@ -98,4 +108,5 @@ namespace My_Internship_Project.Controllers
             return Ok(account);
         }
     }
+
 }
