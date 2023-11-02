@@ -15,6 +15,9 @@ namespace My_Internship_Project
         public DbSet<ArticleTag> ArticleTags { get; set; }
         public DbSet<FavoriteArticle> FavoriteArticles { get; set; }
         public DbSet<Role> Roles { get; set; }
+        public DbSet<RolePermission> RolePermissions { get; set; }
+        public DbSet<Permission> Permissions { get; set; }
+
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
 
