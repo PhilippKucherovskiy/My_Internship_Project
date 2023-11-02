@@ -13,6 +13,7 @@ namespace My_Internship_Project.Services
         void DeleteUserSubscription(int subscriberId, int targetUserId);
         void CreateUserAccount(UserAccount account);
         UserAccount GetUserAccount(int userId);
+        Task AssignUserRole(int userId, string role);
     }
 
 }

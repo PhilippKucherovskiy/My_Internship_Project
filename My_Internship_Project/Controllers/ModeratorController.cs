@@ -17,6 +17,7 @@ public class ModeratorController : ControllerBase
         _commentService = commentService;
     }
 
+    [Authorize(Roles = "Moderator")]
     [HttpPost("create-article")]
     public IActionResult CreateArticle(Article article)
     {
@@ -24,6 +25,7 @@ public class ModeratorController : ControllerBase
         return CreatedAtAction(nameof(ArticleService.GetArticle), new { id = article.Id }, article);
     }
 
+    [Authorize(Roles = "Moderator")]
     [HttpPut("update-article/{id}")]
     public IActionResult UpdateArticle(int id, Article article)
     {
@@ -35,10 +37,12 @@ public class ModeratorController : ControllerBase
         return NoContent();
     }
 
+    [Authorize(Roles = "Moderator")]
     [HttpDelete("delete-article/{id}")]
     public IActionResult DeleteArticle(int id)
     {
         _articleService.DeleteArticle(id);
         return NoContent();
     }
+
 }

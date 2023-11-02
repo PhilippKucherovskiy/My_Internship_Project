@@ -2,7 +2,7 @@
 using My_Internship_Project.Models;
 using My_Internship_Project.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration; // Добавьте это
+using Microsoft.Extensions.Configuration; 
 using System.Threading.Tasks;
 using System.Security.Claims;
 using System.Text;

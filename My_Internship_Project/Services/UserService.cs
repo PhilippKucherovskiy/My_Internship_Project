@@ -15,12 +15,14 @@ namespace My_Internship_Project.Services
         private readonly ApplicationDbContext _context;
         private readonly UserManager<User> _userManager;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly RoleManager<IdentityRole> _roleManager;
 
-        public UserService(ApplicationDbContext context, UserManager<User> userManager, IHttpContextAccessor httpContextAccessor)
+        public UserService(ApplicationDbContext context, RoleManager<IdentityRole> roleManager, UserManager<User> userManager, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
             _userManager = userManager;
             _httpContextAccessor = httpContextAccessor;
+            _roleManager = roleManager;
         }
 
         public List<User> GetUsers()
@@ -53,6 +55,33 @@ namespace My_Internship_Project.Services
                 var principal = new ClaimsPrincipal(identity);
 
                 await _httpContextAccessor.HttpContext.SignInAsync("custom", principal);
+            }
+        }
+
+
+        public async Task AssignUserRole(int userId, string role)
+        {
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            if (user == null)
+            {
+                throw new InvalidOperationException("Пользователь не найден.");
+            }
+
+            if (!await _roleManager.RoleExistsAsync(role))
+            {
+                throw new InvalidOperationException("Роль не существует.");
+            }
+
+            var currentRoles = await _userManager.GetRolesAsync(user);
+            if (currentRoles.Contains(role))
+            {
+                throw new InvalidOperationException("У пользователя уже есть указанная роль.");
+            }
+
+            var result = await _userManager.AddToRoleAsync(user, role);
+            if (!result.Succeeded)
+            {
+                throw new InvalidOperationException("Не получилось назначить роль пользователю.");
             }
         }
 

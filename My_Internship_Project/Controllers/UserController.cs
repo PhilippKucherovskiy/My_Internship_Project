@@ -43,7 +43,24 @@ namespace My_Internship_Project.Controllers
             return Ok(user);
         }
 
-        [Authorize(Roles = "Moderator")]
+        [Authorize(Roles = "Admin")]
+        [HttpPost("assign-role")]
+        public IActionResult AssignUserRole(int userId, string role)
+        {
+            
+            if (!User.IsInRole("Admin"))
+            {
+                return Forbid(); 
+            }
+
+            
+            _userService.AssignUserRole(userId, role);
+
+            return Ok($"Role '{role}' assigned to user with ID {userId}");
+        }
+
+
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> CreateUser(User user, string role)
         {
@@ -51,7 +68,7 @@ namespace My_Internship_Project.Controllers
             return CreatedAtAction(nameof(GetUser), new { id = user.Id }, user);
         }
 
-        [Authorize(Roles = "Moderator")]
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
         public IActionResult UpdateUser(int id, User user)
         {
@@ -63,7 +80,7 @@ namespace My_Internship_Project.Controllers
             return NoContent();
         }
 
-        [Authorize(Roles = "Moderator")]
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public IActionResult DeleteUser(int id)
         {
