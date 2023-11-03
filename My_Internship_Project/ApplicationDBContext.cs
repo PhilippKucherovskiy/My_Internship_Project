@@ -7,6 +7,9 @@ namespace My_Internship_Project
 {
     public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, int>
     {
+        private UserManager<User> userManager;
+        private RoleManager<IdentityRole<int>> roleManager;
+
         public DbSet<UserAccount> UserAccounts { get; set; }
         public DbSet<UserSubscription> UserSubscriptions { get; set; }
         public DbSet<Article> Articles { get; set; }
@@ -26,9 +29,9 @@ namespace My_Internship_Project
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<User>()
-                .Property(u => u.Id) 
+                .Property(u => u.Id)
                 .ValueGeneratedOnAdd()
-                .HasConversion<int>(); 
+                .HasConversion<int>();
 
             modelBuilder.Entity<User>()
                 .HasOne(u => u.Account)
@@ -57,13 +60,37 @@ namespace My_Internship_Project
             modelBuilder.Entity<UserSubscription>()
                 .HasKey(us => new { us.SubscriberId, us.TargetUserId });
 
-            modelBuilder.Entity<Role>()
-    .HasMany(r => r.Permissions)
-    .WithMany(p => p.Roles)
-    .UsingEntity<RolePermission>(
-        j => j.HasOne(rp => rp.Permission).WithMany().HasForeignKey(rp => rp.PermissionId),
-        j => j.HasOne(rp => rp.Role).WithMany().HasForeignKey(rp => rp.RoleId)
-    );
+            SeedDefaultUsersAndRoles(userManager, roleManager).Wait();
+
+        }
+
+        
+        private async Task SeedDefaultUsersAndRoles(UserManager<User> userManager, RoleManager<IdentityRole<int>> roleManager)
+        {
+            var adminUser = new User
+            {
+                UserName = "admin",
+                Email = "admin@example.com",
+            };
+            var moderatorUser = new User
+            {
+                UserName = "moderator",
+                Email = "moderator@example.com",
+            };
+            var regularUser = new User
+            {
+                UserName = "user",
+                Email = "user@example.com",
+            };
+
+            await userManager.CreateAsync(adminUser, "Password1");
+            await userManager.CreateAsync(moderatorUser, "Password2");
+            await userManager.CreateAsync(regularUser, "Password3");
+
+            
+            await userManager.AddToRoleAsync(adminUser, "Admin");
+            await userManager.AddToRoleAsync(moderatorUser, "Moderator");
+            await userManager.AddToRoleAsync(regularUser, "User");
         }
     }
 }

@@ -12,6 +12,7 @@ namespace My_Internship_Project.Models
         public ICollection<Article> Articles { get; set; }//Навигация пользователь-много статей
         public UserAccount Account { get; set; }
         public ICollection<UserSubscription> Subscriptions { get; set; }
+        public List<Role> Roles { get; set; }
     }
 
 }
