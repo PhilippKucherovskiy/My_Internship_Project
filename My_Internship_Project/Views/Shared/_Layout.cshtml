@@ -3,29 +3,66 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - My_Internship_Project</title>
+    <title>@ViewData["Title"] - Персональный блог</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/My_Internship_Project.styles.css" asp-append-version="true" />
+    <style>
+        .footer-content {
+            color: #001100;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+            .footer-content:hover {
+                background-color: #001100;
+                color: #ffffff;
+            }
+
+        .footer-button {
+            background-color: transparent;
+            border: none;
+            color: #001100;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+            .footer-button:hover {
+                background-color: #001100;
+                color: #ffffff;
+            }
+    </style>
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-dark box-shadow mb-3">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">My_Internship_Project</a>
+                <a class="navbar-brand text-light" asp-area="" asp-controller="Home" asp-action="Index">Персональный блог</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
+                    <span class="navbar-toggler-icon text-light"></span>
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link text-light" asp-area="" asp-controller="Home" asp-action="Index">Главная</a>
+                        </li>
+    
+                        <li class="nav-item">
+                            <a class="nav-link text-light" asp-area="" asp-controller="Home" asp-action="Comments">Комментарии</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                            <a class="nav-link text-light" asp-area="" asp-controller="Home" asp-action="Tags">Теги</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-light" asp-area="" asp-controller="Home" asp-action="Users">Пользователи</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-light" asp-area="" asp-controller="Home" asp-action="Roles">Роли</a>
                         </li>
                     </ul>
+                    <div class="nav-item">
+                        <button class="btn btn-outline-light">Выйти</button>
+                    </div>
                 </div>
             </div>
         </nav>
@@ -36,9 +73,12 @@
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
+    <footer class="border-top footer text-light" style="background-color: #f0f0f0;">
         <div class="container">
-            &copy; 2023 - My_Internship_Project - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            <span class="footer-content">&copy; 2023 -</span>
+            <span class="footer-content">Персональный блог -</span>
+            <a asp-area="" asp-controller="Home" asp-action="Privacy" class="footer-content">Конфиденциальность</a>
+            <button class="footer-button">Выйти</button>
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>

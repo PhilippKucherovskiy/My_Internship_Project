@@ -12,6 +12,6 @@
         
 
         public int UserId { get; set; }
-        public User User { get; set; } // Навигационное свойство
+        public User User { get; set; } 
     }
 }
