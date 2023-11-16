@@ -7,8 +7,8 @@ namespace My_Internship_Project
 {
     public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, int>
     {
-        private UserManager<User> userManager;
-        private RoleManager<IdentityRole<int>> roleManager;
+        private readonly UserManager<User> _userManager;
+        private readonly RoleManager<IdentityRole<int>> _roleManager;
 
         public DbSet<UserAccount> UserAccounts { get; set; }
         public DbSet<UserSubscription> UserSubscriptions { get; set; }
@@ -17,12 +17,15 @@ namespace My_Internship_Project
         public DbSet<Comment> Comments { get; set; }
         public DbSet<ArticleTag> ArticleTags { get; set; }
         public DbSet<FavoriteArticle> FavoriteArticles { get; set; }
-        public DbSet<Role> Roles { get; set; }
         public DbSet<RolePermission> RolePermissions { get; set; }
         public DbSet<Permission> Permissions { get; set; }
 
-
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, UserManager<User> userManager, RoleManager<IdentityRole<int>> roleManager)
+            : base(options)
+        {
+            _userManager = userManager;
+            _roleManager = roleManager;
+        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -60,37 +63,8 @@ namespace My_Internship_Project
             modelBuilder.Entity<UserSubscription>()
                 .HasKey(us => new { us.SubscriberId, us.TargetUserId });
 
-            SeedDefaultUsersAndRoles(userManager, roleManager).Wait();
-
-        }
-
-        
-        private async Task SeedDefaultUsersAndRoles(UserManager<User> userManager, RoleManager<IdentityRole<int>> roleManager)
-        {
-            var adminUser = new User
-            {
-                UserName = "admin",
-                Email = "admin@example.com",
-            };
-            var moderatorUser = new User
-            {
-                UserName = "moderator",
-                Email = "moderator@example.com",
-            };
-            var regularUser = new User
-            {
-                UserName = "user",
-                Email = "user@example.com",
-            };
-
-            await userManager.CreateAsync(adminUser, "Password1");
-            await userManager.CreateAsync(moderatorUser, "Password2");
-            await userManager.CreateAsync(regularUser, "Password3");
-
-            
-            await userManager.AddToRoleAsync(adminUser, "Admin");
-            await userManager.AddToRoleAsync(moderatorUser, "Moderator");
-            await userManager.AddToRoleAsync(regularUser, "User");
+          
         }
     }
+
 }

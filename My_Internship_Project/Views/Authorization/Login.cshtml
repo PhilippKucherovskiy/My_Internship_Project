@@ -1,0 +1,26 @@
+﻿@model My_Internship_Project.Models.LoginViewModel
+
+<h2>Вход</h2>
+
+<form asp-action="Login" asp-controller="Authorization" method="post">
+    <div>
+        <label asp-for="UserName"></label>
+        <input asp-for="UserName" />
+        <span asp-validation-for="UserName"></span>
+    </div>
+    <div>
+        <label asp-for="Password"></label>
+        <input asp-for="Password" type="password" />
+        <span asp-validation-for="Password"></span>
+    </div>
+    <div>
+        <input asp-for="RememberMe" />
+        <label asp-for="RememberMe"></label>
+    </div>
+    <button type="submit">Войти</button>
+</form>
+
+<p>Еще не зарегистрированы? <a asp-action="Register" asp-controller="Account">Зарегистрируйтесь</a>.</p>
+<p>Забыли пароль? <a asp-action="ForgotPassword" asp-controller="Account">Сбросьте его</a>.</p>
+
+

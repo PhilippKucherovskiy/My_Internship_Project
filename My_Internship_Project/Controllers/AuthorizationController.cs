@@ -1,31 +1,59 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿// AuthenticationController.cs
+
+using Microsoft.AspNetCore.Identity;
 using My_Internship_Project.Models;
-using My_Internship_Project.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration; 
+using Microsoft.Extensions.Configuration;
 using System.Threading.Tasks;
 using System.Security.Claims;
 using System.Text;
 using System.IdentityModel.Tokens.Jwt;
-using Microsoft.IdentityModel.Tokens;
+using My_Internship_Project.ViewModels;
 
 namespace My_Internship_Project.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class AuthorizationController : ControllerBase
+    public class AuthenticationController : Controller
     {
         private readonly UserManager<User> _userManager;
-        private readonly RoleManager<Role> _roleManager;
-        private readonly IUserService _userService;
-        private readonly IConfiguration _configuration; 
+        private readonly SignInManager<User> _signInManager;
+        private readonly RoleManager<IdentityRole<int>> _roleManager;
+        private readonly IConfiguration _configuration;
 
-        public AuthorizationController(UserManager<User> userManager, RoleManager<Role> roleManager, IUserService userService, IConfiguration configuration)
+        public AuthenticationController(UserManager<User> userManager, SignInManager<User> signInManager, RoleManager<IdentityRole<int>> roleManager, IConfiguration configuration)
         {
             _userManager = userManager;
+            _signInManager = signInManager;
             _roleManager = roleManager;
-            _userService = userService;
-            _configuration = configuration; 
+            _configuration = configuration;
+        }
+
+        [HttpGet]
+        public IActionResult Login()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Login(LoginViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = await _userManager.FindByNameAsync(model.UserName);
+
+                if (user != null && await _userManager.CheckPasswordAsync(user, model.Password))
+                {
+                    var result = await _signInManager.PasswordSignInAsync(user, model.Password, model.RememberMe, false);
+
+                    if (result.Succeeded)
+                    {
+                        return RedirectToAction("Index", "Home");
+                    }
+                }
+
+                ModelState.AddModelError(string.Empty, "Указан неверный логин");
+            }
+
+            return View(model);
         }
 
         [HttpPost("register")]
@@ -53,43 +81,6 @@ namespace My_Internship_Project.Controllers
             return BadRequest("Ошибка при регистрации.");
         }
 
-        [HttpPost("login")]
-        public async Task<IActionResult> Login(LoginModel model)
-        {
-            var user = await _userManager.FindByEmailAsync(model.Email);
-
-            if (user != null && await _userManager.CheckPasswordAsync(user, model.Password))
-            {
-                var token = GenerateJwtToken(user);
-
-                return Ok(new { token });
-            }
-
-            return BadRequest("Ошибка входа.");
-        }
-
-        private string GenerateJwtToken(User user)
-        {
-            var claims = new[]
-            {
-                new Claim(JwtRegisteredClaimNames.Sub, user.Email),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-            };
-
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
-            var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-            var token = new JwtSecurityToken(
-                _configuration["Jwt:Issuer"],
-                _configuration["Jwt:Audience"],
-                claims,
-                expires: DateTime.Now.AddHours(1),
-                signingCredentials: credentials
-            );
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
-        }
-
         [HttpPost("assign-role")]
         public async Task<IActionResult> AssignRole(AssignRoleModel model)
         {
@@ -105,6 +96,13 @@ namespace My_Internship_Project.Controllers
             }
 
             return BadRequest("Ошибка при назначении роли.");
+        }
+
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout()
+        {
+            await _signInManager.SignOutAsync();
+            return RedirectToAction("Index", "Home");
         }
     }
 }
